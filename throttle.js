@@ -1,15 +1,11 @@
-
 /**
  * Module dependencies.
  */
 
-var assert = require('assert');
-var Parser = require('stream-parser');
-var inherits = require('util').inherits;
-var Transform = require('stream').Transform;
-
-// node v0.8.x compat
-if (!Transform) Transform = require('readable-stream/transform');
+var assert = require("assert");
+var Parser = require("stream-parser");
+var inherits = require("util").inherits;
+var Transform = require("stream").Transform;
 
 /**
  * Module exports.
@@ -41,15 +37,16 @@ module.exports = Throttle;
  * @api public
  */
 
-function Throttle (opts) {
+function Throttle(opts) {
   if (!(this instanceof Throttle)) return new Throttle(opts);
 
-  if ('number' == typeof opts) opts = { bps: opts };
+  if ("number" == typeof opts) opts = { bps: opts };
   if (!opts) opts = {};
   if (null == opts.lowWaterMark) opts.lowWaterMark = 0;
   if (null == opts.highWaterMark) opts.highWaterMark = 0;
-  if (null == opts.bps) throw new Error('must pass a "bps" bytes-per-second option');
-  if (null == opts.chunkSize) opts.chunkSize = opts.bps / 10 | 0; // 1/10th of "bps" by default
+  if (null == opts.bps)
+    throw new Error('must pass a "bps" bytes-per-second option');
+  if (null == opts.chunkSize) opts.chunkSize = (opts.bps / 10) | 0; // 1/10th of "bps" by default
 
   Transform.call(this, opts);
 
@@ -92,7 +89,7 @@ Throttle.prototype._onchunk = function (output, done) {
   var totalSeconds = (Date.now() - this.startTime) / 1000;
   var expected = totalSeconds * this.bps;
 
-  function d () {
+  function d() {
     self._passthroughChunk();
     done();
   }
@@ -100,7 +97,7 @@ Throttle.prototype._onchunk = function (output, done) {
   if (this.totalBytes > expected) {
     // Use this byte count to calculate how many seconds ahead we are.
     var remainder = this.totalBytes - expected;
-    var sleepTime = remainder / this.bps * 1000;
+    var sleepTime = (remainder / this.bps) * 1000;
     //console.error('sleep time: %d', sleepTime);
     if (sleepTime > 0) {
       setTimeout(d, sleepTime);
